@@ -1,17 +1,24 @@
 {
-  "name": "bash-language-server",
+  "name": "@amedama41/bash-language-server-mod",
   "description": "A language server for Bash",
-  "author": "Mads Hartmann",
+  "author": "amedama41",
   "license": "MIT",
-  "version": "5.0.0",
+  "version": "5.0.0-beta.0",
   "main": "./out/server.js",
   "typings": "./out/server.d.ts",
   "bin": {
-    "bash-language-server": "./out/cli.js"
+    "bash-language-server-mod": "./out/cli.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bash-lsp/bash-language-server"
+    "url": "https://github.com/amedama41/bash-language-server",
+    "directory": "server"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "executableFiles": [
+      "src/get-options.sh"
+    ]
   },
   "engines": {
     "node": ">=16"
