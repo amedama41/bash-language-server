@@ -3,7 +3,7 @@
   "description": "A language server for Bash",
   "author": "amedama41",
   "license": "MIT",
-  "version": "5.0.0-beta.0",
+  "version": "5.0.0-beta.1",
   "main": "./out/server.js",
   "typings": "./out/server.d.ts",
   "bin": {

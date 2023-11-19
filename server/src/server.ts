@@ -514,7 +514,7 @@ export default class BashServer {
       )
 
       if (commandName) {
-        optionsCompletions = getCommandOptions(commandName, word).map((option) => ({
+        optionsCompletions = getCommandOptions(commandName, word, this.workspaceFolder).map((option) => ({
           label: option,
           kind: LSP.CompletionItemKind.Constant,
           data: {
@@ -824,8 +824,12 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
   }
 }
 
-export function getCommandOptions(name: string, word: string): string[] {
-  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [name, word])
+export function getCommandOptions(name: string, word: string, workspaceFolder: string | null): string[] {
+  workspaceFolder = workspaceFolder || ""
+  if (workspaceFolder.startsWith("file://")) {
+    workspaceFolder = workspaceFolder.slice("file://".length);
+  }
+  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [workspaceFolder, name, word])
 
   if (options.status !== 0) {
     return []
