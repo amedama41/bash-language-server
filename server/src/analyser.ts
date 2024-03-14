@@ -681,6 +681,41 @@ export default class Analyzer {
   }
 
   /**
+   * Find the commands at the given point.
+   */
+  public commandsAtPoint(uri: string, line: number, column: number): string[] {
+    const node = this.nodeAtPoint(uri, line, column)
+
+    let parent: Parser.SyntaxNode | null = node
+    let argument: Parser.SyntaxNode | null = null
+
+    while (parent && parent.type !== 'command') {
+      argument = parent
+      parent = parent.parent
+    }
+
+    if (!parent || !argument || argument.type === 'command_name') {
+      return []
+    }
+
+    const firstChild = parent.firstNamedChild
+
+    if (!firstChild || firstChild.type !== 'command_name') {
+      return []
+    }
+
+    const commands = []
+    for (const child of parent.children) {
+        if (child.id === argument.id) {
+            break
+        }
+        commands.push(child.text.trim())
+    }
+
+    return commands
+  }
+
+  /**
    * Find a block of comments above a line position
    */
   public commentsAbove(uri: string, line: number): string | null {

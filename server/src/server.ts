@@ -513,15 +513,15 @@ export default class BashServer {
 
     let optionsCompletions: BashCompletionItem[] = []
     if (word) {
-      const commandName = this.analyzer.commandNameAtPoint(
+      const commands = this.analyzer.commandsAtPoint(
         params.textDocument.uri,
         params.position.line,
         // Go one character back to get completion on the current word
         Math.max(params.position.character - 1, 0),
       )
 
-      if (commandName) {
-        optionsCompletions = getCommandOptions(commandName, word, this.workspaceFolder).map((option) => ({
+      if (commands.length > 0) {
+        optionsCompletions = getCommandOptions(commands, word, this.workspaceFolder).map((option) => ({
           label: option,
           kind: LSP.CompletionItemKind.Constant,
           data: {
@@ -913,12 +913,12 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
   }
 }
 
-export function getCommandOptions(name: string, word: string, workspaceFolder: string | null): string[] {
+export function getCommandOptions(commands: string[], word: string, workspaceFolder: string | null): string[] {
   workspaceFolder = workspaceFolder || ""
   if (workspaceFolder.startsWith("file://")) {
     workspaceFolder = workspaceFolder.slice("file://".length);
   }
-  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [workspaceFolder, name, word])
+  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [workspaceFolder, ...commands, word])
 
   if (options.status !== 0) {
     return []
