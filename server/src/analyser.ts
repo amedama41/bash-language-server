@@ -683,7 +683,7 @@ export default class Analyzer {
   /**
    * Find the commands at the given point.
    */
-  public commandsAtPoint(uri: string, line: number, column: number): string[] {
+  public commandsAtPoint(uri: string, line: number, column: number, include_point: boolean): string[] {
     const node = this.nodeAtPoint(uri, line, column)
 
     let parent: Parser.SyntaxNode | null = node
@@ -706,10 +706,13 @@ export default class Analyzer {
 
     const commands = []
     for (const child of parent.children) {
-        if (child.id === argument.id) {
-            break
+      if (child.id === argument.id) {
+        if (include_point) {
+          commands.push(child.text.trim())
         }
-        commands.push(child.text.trim())
+        break
+      }
+      commands.push(child.text.trim())
     }
 
     return commands

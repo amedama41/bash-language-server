@@ -116,7 +116,7 @@ export default class BashServer {
       textDocumentSync: LSP.TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: ['$', '{'],
+        triggerCharacters: ['$', '{', '/', ' '],
       },
       hoverProvider: true,
       documentHighlightProvider: true,
@@ -440,7 +440,7 @@ export default class BashServer {
         start: params.position,
         end: { ...params.position, character: params.position.character + 1 },
       })
-      const isNextCharacterSpaceOrEmpty = nextCharacter === '' || nextCharacter === ' '
+      const isNextCharacterSpaceOrEmpty = nextCharacter === '' || nextCharacter === ' ' || nextCharacter === '\n'
       if (!isNextCharacterSpaceOrEmpty) {
         // We are in the middle of something, so don't complete
         return []
@@ -512,36 +512,36 @@ export default class BashServer {
     }))
 
     let optionsCompletions: BashCompletionItem[] = []
-    if (word) {
-      const commands = this.analyzer.commandsAtPoint(
-        params.textDocument.uri,
-        params.position.line,
-        // Go one character back to get completion on the current word
-        Math.max(params.position.character - 1, 0),
-      )
+    const cword = word === null ? "" : word
+    const commands = this.analyzer.commandsAtPoint(
+      params.textDocument.uri,
+      params.position.line,
+      // Go one character back to get completion on the current word
+      Math.max(params.position.character - (word === null ? 2 : 1), 0),
+      word === null,
+    )
 
-      if (commands.length > 0) {
-        optionsCompletions = getCommandOptions(commands, word, this.workspaceFolder).map((option) => ({
-          label: option,
-          kind: LSP.CompletionItemKind.Constant,
-          data: {
-            type: CompletionItemDataType.Symbol,
-          },
-          textEdit: {
-            newText: option,
-            range: {
-              start: {
-                character: params.position.character - word.length,
-                line: params.position.line,
-              },
-              end: {
-                character: params.position.character - word.length,
-                line: params.position.line,
-              },
+    if (commands.length > 0) {
+      optionsCompletions = getCommandOptions(commands, cword, this.workspaceFolder).map((option) => ({
+        label: option,
+        kind: LSP.CompletionItemKind.Constant,
+        data: {
+          type: CompletionItemDataType.Symbol,
+        },
+        textEdit: {
+          newText: option,
+          range: {
+            start: {
+              character: params.position.character - cword.length,
+              line: params.position.line,
+            },
+            end: {
+              character: params.position.character - cword.length,
+              line: params.position.line,
             },
           },
-        }))
-      }
+        },
+      }))
     }
 
     const allCompletions = [
@@ -558,7 +558,7 @@ export default class BashServer {
       return allCompletions.filter((item) => item.label.startsWith(word))
     }
 
-    return allCompletions
+    return optionsCompletions
   }
 
   private async onCompletionResolve(
