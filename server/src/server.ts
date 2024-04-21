@@ -522,7 +522,8 @@ export default class BashServer {
     )
 
     if (commands.length > 0) {
-      optionsCompletions = getCommandOptions(commands, cword, this.workspaceFolder).map((option) => ({
+      const cwd = (this.workspaceFolder || path.dirname(params.textDocument.uri)).slice("file://".length)
+      optionsCompletions = getCommandOptions(commands, cword, cwd).map((option) => ({
         label: option,
         kind: LSP.CompletionItemKind.Constant,
         data: {
@@ -913,12 +914,8 @@ function getMarkdownContent(documentation: string, language?: string): LSP.Marku
   }
 }
 
-export function getCommandOptions(commands: string[], word: string, workspaceFolder: string | null): string[] {
-  workspaceFolder = workspaceFolder || ""
-  if (workspaceFolder.startsWith("file://")) {
-    workspaceFolder = workspaceFolder.slice("file://".length);
-  }
-  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [workspaceFolder, ...commands, word])
+export function getCommandOptions(commands: string[], word: string, cwd: string): string[] {
+  const options = spawnSync(path.join(__dirname, '../src/get-options.sh'), [...commands, word], { cwd })
 
   if (options.status !== 0) {
     return []

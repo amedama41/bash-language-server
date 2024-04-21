@@ -26,13 +26,6 @@ fi
 
 source "$COMPLETIONSRC"
 
-WORKSPACE_FOLDER=$1
-shift
-if [ -d "$WORKSPACE_FOLDER" ]
-then
-    cd $WORKSPACE_FOLDER
-fi
-
 COMP_LINE="$*"
 COMP_WORDS=("$@")
 COMP_CWORD="${#COMP_WORDS[@]}"
